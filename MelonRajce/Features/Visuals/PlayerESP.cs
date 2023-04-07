@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace MelonRajce.Features.Visuals
 {
@@ -70,7 +71,6 @@ namespace MelonRajce.Features.Visuals
 
         // Flags
         internal bool DisplayItem = false;
-        internal bool DisplayHealth = false;
         internal bool DisplayTeamName = false;
         internal bool DisplayPlayerName = false;
 
@@ -168,19 +168,19 @@ namespace MelonRajce.Features.Visuals
 
                 GameObject model = ccm.myModel;
                 if (model == null)
-                {
-                    RajceMain.logger.Msg("Player does not have a model");
                     continue;
-                }
 
                 Transform tModel = model.transform;
-                if (Vector3.Distance(tModel.position, current.transform.position) > DrawDistance)
+                float distance = 0f;
+
+                if ((distance = Vector3.Distance(tModel.position, current.transform.position)) > DrawDistance)
                     continue;
 
+                PlayerStats pStats = player.GetComponent<PlayerStats>(); // We dont need to check if it exists cause it must exist for the player to even be alive
                 switch(team)
                 {
                     case Team.CDP:
-                    case Team.RSC:
+                    case Team.RSC: // Body
                         {
                             Transform body = tModel.Find("Body");
                             if (body == null)
@@ -190,47 +190,133 @@ namespace MelonRajce.Features.Visuals
                             if (r == null)
                                 break;
 
-                            Color c = Color.yellow;
-                            if (ccm.curClass == 1)
-                                c = new Color32(232, 117, 9, 255);
+                            Color col = Color.yellow;
+                            string teamName = "SCI";
 
-                            DrawBoundingBox(r.bounds, c);
+                            if (ccm.curClass == 1)
+                            {
+                                col = new Color32(232, 117, 9, 255);
+                                teamName = "DBOI";
+                            }
+
+                            Rect rect = DrawBoundingBox(r.bounds, col);
+                            GUIStyle style = GUI.skin.label.Copy();
+                            Color oldCol = GUI.contentColor;
+
+                            GUI.contentColor = col;
+                            GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
+
+                            if (DisplayPlayerName)
+                            {
+                                GUIContent c = new GUIContent(player.GetComponent<NicknameSync>().myNick);
+                                Vector2 nameSize = GUI.skin.label.CalcSize(c);
+
+                                GUI.Label(new Rect(new Vector2(rect.x + ((rect.width / 2) - (nameSize.x / 2)), rect.y - 2 - nameSize.y), nameSize), c);
+                            }
+
+                            if (DisplayTeamName)
+                            {
+                                GUIContent c = new GUIContent(teamName);
+                                Vector2 teamSize = GUI.skin.label.CalcSize(c);
+
+                                GUI.Label(new Rect(new Vector2(rect.x - (5 + teamSize.x), rect.y), teamSize), c);
+                            }
+
+                            GUI.contentColor = oldCol;
+                            GUI.skin.label = style;
 
                             break;
                         }
                     case Team.MTF:
                     case Team.CHI: 
-                    case Team.TUT: // Eyes, Shoes
+                    case Team.TUT: // Body
                         {
-                            Color c = Color.blue;
+                            Color col = Color.magenta;
+                            string teamName = team == Team.MTF ? "MTF" : (team == Team.CHI ? "CHA" : "TUT");
+                            string subClass = null;
+
                             switch (ccm.curClass)
                             {
                                 case 8: // Chaos
-                                    c = Color.green;
+                                    col = Color.green;
                                     break;
                                 case 12: // Commander
+                                    col = Color.blue;
+                                    subClass = "COM";
                                     break;
                                 case 4: // Scientist MTF
+                                    col = new Color32(34, 130, 227, 255);
+                                    subClass = "SCI";
+                                    break;
                                 case 11: // Lieutenant
-                                    c = new Color32(34, 130, 227, 255);
+                                    col = new Color32(34, 130, 227, 255);
+                                    subClass = "LIE";
                                     break;
                                 case 13: // Cadet
-                                    c = Color.cyan;
+                                    col = Color.cyan;
+                                    subClass = "CAD";
                                     break;
                                 case 15: // Guard
-                                    c = Color.gray;
-                                    break;
-                                default:
-                                    c = Color.magenta;
+                                    col = Color.gray;
+                                    subClass = "GUA";
                                     break;
                             }
 
-                            Transform shoes = tModel.Find("Shoes");
-                            Transform eyes = tModel.Find("Eyes");
-                            if (shoes == null || eyes == null)
+                            Transform body = tModel.Find("Body");
+                            if (body == null)
                                 break;
 
-                            Vector3 sShoesPos = current.WorldToScreenPoint(shoes.position);
+                            Renderer r = body.GetComponent<Renderer>();
+                            if (r == null)
+                                break;
+
+                            Bounds b = r.bounds;
+                            Vector3 ext = b.extents;
+                            ext.y *= 1.75f;
+
+                            b.extents = ext;
+
+                            Rect rect = DrawBoundingBox(b, col);
+                            GUIStyle style = GUI.skin.label.Copy();
+                            Color oldCol = GUI.contentColor;
+
+                            GUI.contentColor = col;
+                            GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
+
+                            if (DisplayPlayerName)
+                            {
+                                GUIContent c = new GUIContent(player.GetComponent<NicknameSync>().myNick);
+                                Vector2 nameSize = GUI.skin.label.CalcSize(c);
+
+                                GUI.Label(new Rect(new Vector2(rect.x + ((rect.width / 2) - (nameSize.x / 2)), rect.y - 2 - nameSize.y), nameSize), c);
+                            }
+
+                            if (DisplayTeamName)
+                            {
+                                GUIContent c = new GUIContent(teamName);
+                                Vector2 teamSize = GUI.skin.label.CalcSize(c);
+
+                                Vector2 start = new Vector2(rect.x - (5 + teamSize.x), rect.y);
+                                GUI.Label(new Rect(start, teamSize), c);
+
+                                if (subClass != null)
+                                {
+                                    GUIContent c1 = new GUIContent(subClass);
+                                    Vector2 subSize = GUI.skin.label.CalcSize(c1);
+
+                                    if (distance <= 150)
+                                    {
+                                        // Calculate the new position
+                                        start.x = rect.x - (5 + subSize.x);
+                                        start.y += teamSize.y;
+
+                                        GUI.Label(new Rect(start, subSize), c1);
+                                    }
+                                }
+                            }
+
+                            GUI.contentColor = oldCol;
+                            GUI.skin.label = style;
 
                             break;
                         }
@@ -238,38 +324,86 @@ namespace MelonRajce.Features.Visuals
                         {
                             Transform scpModel = tModel;
                             float div = 1f;
+                            string scpNum = "000";
 
                             switch (ccm.curClass)
                             {
                                 case 0: // 173 (myModel)
+                                    scpNum = "173";
                                     break;
                                 case 3: // 106 (LOWpoly)
                                     scpModel = scpModel.Find("LOWpoly");
                                     div = 2f;
+                                    scpNum = "106";
                                     break;
                                 case 5: // 049 (scp049_player_reference)
                                     scpModel = scpModel.Find("scp049_player_reference");
+                                    scpNum = "049";
                                     break;
                                 case 9: // 096 (SCP-096_001)
                                     scpModel = scpModel.Find("SCP-096_001");
                                     div = 1.75f;
+                                    scpNum = "096";
                                     break;
                                 case 10: // 049-2 (Body)
                                     scpModel = scpModel.Find("Body");
+                                    scpNum = "049-2";
                                     break;
                                 case 16: // 939-53 (Cube)
                                     scpModel = scpModel.Find("Cube");
+                                    scpNum = "939";
                                     break;
                                 case 17: // 939-106 (Neutre_SCP939_Corp_low)
                                     scpModel = scpModel.Find("Neutre_SCP939_Corp_low");
+                                    scpNum = "939";
                                     break;
                             }
 
                             Renderer r = scpModel.GetComponent<Renderer>();
                             if (r == null)
+                            {
+                                RajceMain.logger.Msg("SCP '{0}' does not have a renderer");
                                 break;
+                            }
 
                             Rect rect = DrawBoundingBox(r.bounds, Color.red, div);
+                            GUIStyle style = GUI.skin.label.Copy();
+                            Color oldCol = GUI.contentColor;
+
+                            GUI.contentColor = Color.red;
+                            GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
+
+                            if (DisplayPlayerName)
+                            {
+                                GUIContent c = new GUIContent(player.GetComponent<NicknameSync>().myNick);
+                                Vector2 nameSize = GUI.skin.label.CalcSize(c);
+
+                                GUI.Label(new Rect(new Vector2(rect.x + ((rect.width / 2) - (nameSize.x / 2)), rect.y - 2 - nameSize.y), nameSize), c);
+                            }
+
+                            if (DisplayTeamName)
+                            {
+                                GUIContent c = new GUIContent("SCP");
+                                GUIContent c1 = new GUIContent(scpNum);
+
+                                Vector2 teamSize = GUI.skin.label.CalcSize(c);
+                                Vector2 numSize = GUI.skin.label.CalcSize(c1);
+
+                                Vector2 start = new Vector2(rect.x - (5 + teamSize.x), rect.y);
+                                GUI.Label(new Rect(start, teamSize), c);
+
+                                if (distance <= 150)
+                                {
+                                    // Calculate the new position
+                                    start.x = rect.x - (5 + numSize.x);
+                                    start.y += teamSize.y;
+
+                                    GUI.Label(new Rect(start, numSize), c1);
+                                }
+                            }
+
+                            GUI.contentColor = oldCol;
+                            GUI.skin.label = style;
 
                             break;
                         }

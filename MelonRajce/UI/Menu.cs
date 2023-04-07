@@ -326,7 +326,7 @@ namespace MelonRajce.UI
         }
 
         // Global constants
-        public static readonly Vector2 MenuSize = new Vector2(650, 400);
+        public static readonly Vector2 MenuSize = new Vector2(650, 450);
         public static readonly float OFFSET_BETWEEN_TABS = 5f;
 
         // Window data

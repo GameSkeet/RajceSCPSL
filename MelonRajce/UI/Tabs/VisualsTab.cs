@@ -75,10 +75,6 @@ namespace MelonRajce.UI.Tabs
 
                             BeginGroup("Flags", 14).CenterX = true;
 
-                            DrawToggle("Health", esp.DisplayHealth, (elem, t) =>
-                            {
-                                esp.DisplayHealth = t;
-                            });
                             DrawToggle("Team name", esp.DisplayTeamName, (elem, t) =>
                             {
                                 esp.DisplayTeamName = t;
@@ -120,6 +116,12 @@ namespace MelonRajce.UI.Tabs
                         }, 50f, 120f, wholeNumbers: true);
 
                         EndGroup();
+                    }
+
+                    // No Flash
+                    {
+                        NoFlash noFlash = FeatureManager.GetFeature<NoFlash>();
+                        DrawFeature(noFlash);
                     }
 
                     EndColumn();

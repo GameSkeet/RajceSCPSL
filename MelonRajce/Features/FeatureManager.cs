@@ -27,6 +27,7 @@ namespace MelonRajce.Features
                 new WorldChanger(),
                 new ViewmodelChanger(),
                 new PlayerESP(),
+                new NoFlash(),
 
                 // Movement
                 new NoDoors(),

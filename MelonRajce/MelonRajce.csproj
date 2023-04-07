@@ -130,6 +130,7 @@
     <Compile Include="Features\Misc\Hitmarks.cs" />
     <Compile Include="Features\Movement\NoDoors.cs" />
     <Compile Include="Features\Movement\SilentWalk.cs" />
+    <Compile Include="Features\Visuals\NoFlash.cs" />
     <Compile Include="Features\Visuals\PlayerESP.cs" />
     <Compile Include="Features\Visuals\FOVChanger.cs" />
     <Compile Include="Features\Visuals\SeeAllPlayers.cs" />
