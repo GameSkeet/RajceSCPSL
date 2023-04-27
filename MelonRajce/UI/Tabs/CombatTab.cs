@@ -7,16 +7,11 @@ namespace MelonRajce.UI.Tabs
 {
     internal class CombatTab : UITab
     {
-        private bool m_bSilentAim = false;
-        private float m_fFOV = 10;
-
         protected override void OnDraw()
         {
             AddPadding(5, 5);
 
-            ForceHeadshot forceHeadshot = FeatureManager.GetFeature<ForceHeadshot>();
-
-            DrawFeature(forceHeadshot);
+            DrawFeature(FeatureManager.GetFeature<ForceHeadshot>());
 
             BeginRow();
 
@@ -24,19 +19,15 @@ namespace MelonRajce.UI.Tabs
             {
                 BeginColumn();
 
-                DrawToggle("Silent aim", m_bSilentAim, (elem, t) =>
-                {
-                    m_bSilentAim = t;
-                }, redrawOnAction: true);
+                SilentAim silent = FeatureManager.GetFeature<SilentAim>();
+                DrawFeature(silent, redrawOnAction: true);
 
-                if (m_bSilentAim)
+                if (silent.IsActive)
                 {
                     BeginGroup("Silent Aim");
 
-                    DrawSlider("FOV", m_fFOV, (elem, v) =>
-                    {
-                        m_fFOV = v;
-                    }, 0, 180, wholeNumbers: true, sliderSize: new Vector2(180, 10));
+                    DrawToggle("Draw fov", silent.DrawFOVCircle, (elem, t) => silent.DrawFOVCircle = t);
+                    DrawSlider("FOV", silent.pSilentFOV, (elem, v) => silent.pSilentFOV = v, 0, 90, wholeNumbers: true, sliderSize: new Vector2(180, 10));
 
                     EndGroup();
                 }

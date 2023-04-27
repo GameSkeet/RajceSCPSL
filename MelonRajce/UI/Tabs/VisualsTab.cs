@@ -1,12 +1,6 @@
 ﻿using MelonRajce.Features;
 using MelonRajce.Features.Visuals;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using UnityEngine;
 
 namespace MelonRajce.UI.Tabs
@@ -45,6 +39,10 @@ namespace MelonRajce.UI.Tabs
                         DrawToggle("Disable Post Processing", changer.currentPost, (elem, t) =>
                         {
                             changer.TogglePostProcess(t);
+                        }, 14);
+                        DrawToggle("Show bullet holes", changer.currentBulletholes, (elem, t) =>
+                        {
+                            changer.currentBulletholes = t;
                         }, 14);
 
                         EndGroup();
@@ -87,6 +85,10 @@ namespace MelonRajce.UI.Tabs
                             {
                                 esp.DisplayItem = t;
                             });
+                            DrawToggle("Ammo bar", esp.DisplayAmmoBar, (elem, t) =>
+                            {
+                                esp.DisplayAmmoBar = t;
+                            });
 
                             EndGroup();
                         }
@@ -122,6 +124,20 @@ namespace MelonRajce.UI.Tabs
                     {
                         NoFlash noFlash = FeatureManager.GetFeature<NoFlash>();
                         DrawFeature(noFlash);
+                    }
+
+                    // Item ESP
+                    {
+                        BeginGroup("Item ESP", 16).CenterX = true;
+
+                        ItemESP esp = FeatureManager.GetFeature<ItemESP>();
+
+                        DrawToggle("Enable", esp.IsActive, (elem, t) =>
+                        {
+                            esp.IsActive = t;
+                        }, 14);
+
+                        EndGroup();
                     }
 
                     EndColumn();

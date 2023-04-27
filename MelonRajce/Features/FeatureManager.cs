@@ -1,6 +1,5 @@
 ﻿using MelonRajce.Features.Misc;
 using MelonRajce.Features.Debug;
-using MelonRajce.Features.Voice;
 using MelonRajce.Features.Combat;
 using MelonRajce.Features.Visuals;
 using MelonRajce.Features.Movement;
@@ -27,7 +26,9 @@ namespace MelonRajce.Features
                 new WorldChanger(),
                 new ViewmodelChanger(),
                 new PlayerESP(),
+                new ItemESP(),
                 new NoFlash(),
+                new CursorFix(),
 
                 // Movement
                 new NoDoors(),
@@ -35,19 +36,21 @@ namespace MelonRajce.Features
 
                 // Combat
                 new ForceHeadshot(),
+                new SilentAim(),
 
                 // Misc
                 new Electrician(),
                 new Hitmarks(),
 
                 // Voice
-                new NoBatteryUsage(),
 
                 // Debug
 #if DEBUG
                 new DebugView(),
 #endif
             };
+
+            GetFeature<CursorFix>().IsActive = true;
         }
 
         // Gets feature T if its registered

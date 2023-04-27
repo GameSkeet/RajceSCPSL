@@ -1,4 +1,6 @@
-﻿using MelonRajce.Hooks;
+﻿using MelonRajce.UI;
+using MelonRajce.Hooks;
+using MelonRajce.Features.Combat;
 
 using System;
 using System.Linq;
@@ -6,15 +8,19 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace MelonRajce.Features.Visuals
 {
     internal class PlayerESP : Feature
     {
+        private const int MinFontSizeToDraw = 4;
+
         private GameObject localPlayer;
         private Material lineMaterial;
         private Camera current;
+
+        private Texture2D aimbotTargetImage = null;
+        private SilentAim talent = null; // VS suggested this name and its kinda true cause it makes you talented
 
         private Dictionary<Team, Team[]> TeamMateList = new Dictionary<Team, Team[]>()
         {
@@ -71,6 +77,7 @@ namespace MelonRajce.Features.Visuals
 
         // Flags
         internal bool DisplayItem = false;
+        internal bool DisplayAmmoBar = false;
         internal bool DisplayTeamName = false;
         internal bool DisplayPlayerName = false;
 
@@ -138,6 +145,18 @@ namespace MelonRajce.Features.Visuals
             return DrawBoundingBox(new Vector2(x, y), new Vector2(width, height), c);
         }
 
+        public override void OnEnable()
+        {
+            if (aimbotTargetImage == null)
+            {
+                AssetBundle bundle = Utils.LoadBundle("Data.assets");
+
+                aimbotTargetImage = (Texture2D)bundle.LoadAsset<Texture>("AimbotTarget");
+                GameObject.DontDestroyOnLoad(aimbotTargetImage);
+            }
+            if (talent == null)
+                talent = FeatureManager.GetFeature<SilentAim>();
+        }
         public override void OnConnect()
         {
             localPlayer = PlayerManager.localPlayer;
@@ -146,6 +165,9 @@ namespace MelonRajce.Features.Visuals
         public override void OnDraw()
         {
             if (!m_bIsConnected)
+                return;
+
+            if (Menu.IsVisible)
                 return;
 
             current = Camera.main;
@@ -176,8 +198,16 @@ namespace MelonRajce.Features.Visuals
                 if ((distance = Vector3.Distance(tModel.position, current.transform.position)) > DrawDistance)
                     continue;
 
-                PlayerStats pStats = player.GetComponent<PlayerStats>(); // We dont need to check if it exists cause it must exist for the player to even be alive
-                switch(team)
+                bool isAimbotTarget = player == talent.targetPlayer;
+
+                Inventory inv = player.GetComponent<Inventory>(); // Gets the player's inventory
+                WeaponManager wpnManager = player.GetComponent<WeaponManager>(); // Gets the player's weapon manager
+                WeaponManager.Weapon wpn = null;
+
+                if (wpnManager.NetworkcurWeapon != -1)
+                    wpn = wpnManager.weapons[wpnManager.NetworkcurWeapon]; // Gets the players current weapon
+
+                switch (team)
                 {
                     case Team.CDP:
                     case Team.RSC: // Body
@@ -199,14 +229,14 @@ namespace MelonRajce.Features.Visuals
                                 teamName = "DBOI";
                             }
 
-                            Rect rect = DrawBoundingBox(r.bounds, col);
+                            Rect rect = DrawBoundingBox(r.bounds, !isAimbotTarget ? col : Color.white);
                             GUIStyle style = GUI.skin.label.Copy();
                             Color oldCol = GUI.contentColor;
 
                             GUI.contentColor = col;
-                            GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
+                            int currFontSize = GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
 
-                            if (DisplayPlayerName)
+                            if (DisplayPlayerName && currFontSize >= MinFontSizeToDraw)
                             {
                                 GUIContent c = new GUIContent(player.GetComponent<NicknameSync>().myNick);
                                 Vector2 nameSize = GUI.skin.label.CalcSize(c);
@@ -214,12 +244,64 @@ namespace MelonRajce.Features.Visuals
                                 GUI.Label(new Rect(new Vector2(rect.x + ((rect.width / 2) - (nameSize.x / 2)), rect.y - 2 - nameSize.y), nameSize), c);
                             }
 
-                            if (DisplayTeamName)
+                            Vector2 leftSide = new Vector2(rect.x, rect.y);
+                            if (DisplayTeamName && currFontSize >= MinFontSizeToDraw)
                             {
                                 GUIContent c = new GUIContent(teamName);
                                 Vector2 teamSize = GUI.skin.label.CalcSize(c);
+                                Vector2 size = new Vector2(-(5 + teamSize.x), -teamSize.y / 4);
 
-                                GUI.Label(new Rect(new Vector2(rect.x - (5 + teamSize.x), rect.y), teamSize), c);
+                                GUI.Label(new Rect(leftSide + size, teamSize), c);
+                                leftSide.y -= -teamSize.y;
+                            }
+                            if (isAimbotTarget)
+                            {
+                                GUIContent c = new GUIContent(aimbotTargetImage);
+                                Vector2 targetSize = GUI.skin.label.CalcSize(c);
+                                Vector2 size = new Vector2(-(5 + targetSize.x), -2);
+
+                                GUI.Label(new Rect(leftSide + size, targetSize), c);
+                                leftSide.y -= targetSize.y + 2;
+                            }
+
+                            Inventory.SyncItemInfo? it = null; // Current item that the player is holding
+
+                            if (DisplayItem || DisplayAmmoBar)
+                            {
+                                // Gets the item from the players inventory
+                                foreach (Inventory.SyncItemInfo sii in inv.items)
+                                {
+                                    if (sii.uniq == inv.NetworkitemUniq)
+                                    {
+                                        it = sii;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Vector2 bottomDisplays = new Vector2(rect.x, rect.y + rect.height + 2);
+                            if (DisplayAmmoBar && wpn != null)
+                            {
+                                float paddingFromTop = 0;
+                                GUIContent c = new GUIContent(it.Value.durability.ToString());
+                                Vector2 ammoText = GUI.skin.label.CalcSize(c);
+
+                                if (currFontSize >= MinFontSizeToDraw)
+                                    paddingFromTop = (ammoText.y - 2) / 4;
+
+                                float width = 0;
+                                bottomDisplays.y += paddingFromTop;
+                                DrawLine(bottomDisplays, new Vector2(width = (it.Value.durability / wpn.maxAmmo) * rect.width, 0) + bottomDisplays, Color.blue);
+
+                                if (currFontSize >= MinFontSizeToDraw)
+                                    GUI.Label(new Rect(new Vector2(bottomDisplays.x + width + 2, bottomDisplays.y - ammoText.y / 2), ammoText), c);
+                            }
+                            if (DisplayItem && it != null)
+                            {
+                                Vector2 size = new Vector2(rect.width, rect.width);
+                                GUI.DrawTexture(new Rect(bottomDisplays, size), inv.availableItems[it.Value.id].icon);
+
+                                bottomDisplays.y += size.y;
                             }
 
                             GUI.contentColor = oldCol;
@@ -229,7 +311,7 @@ namespace MelonRajce.Features.Visuals
                         }
                     case Team.MTF:
                     case Team.CHI: 
-                    case Team.TUT: // Body
+                    case Team.TUT: // Shoes, Eyes
                         {
                             Color col = Color.magenta;
                             string teamName = team == Team.MTF ? "MTF" : (team == Team.CHI ? "CHA" : "TUT");
@@ -276,27 +358,26 @@ namespace MelonRajce.Features.Visuals
 
                             b.extents = ext;
 
-                            Rect rect = DrawBoundingBox(b, col);
+                            Rect rect = DrawBoundingBox(b, !isAimbotTarget ? col : Color.white);
                             GUIStyle style = GUI.skin.label.Copy();
                             Color oldCol = GUI.contentColor;
 
                             GUI.contentColor = col;
-                            GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
+                            int currFontSize = GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
 
-                            if (DisplayPlayerName)
+                            if (DisplayPlayerName && currFontSize >= MinFontSizeToDraw)
                             {
                                 GUIContent c = new GUIContent(player.GetComponent<NicknameSync>().myNick);
                                 Vector2 nameSize = GUI.skin.label.CalcSize(c);
 
                                 GUI.Label(new Rect(new Vector2(rect.x + ((rect.width / 2) - (nameSize.x / 2)), rect.y - 2 - nameSize.y), nameSize), c);
                             }
-
-                            if (DisplayTeamName)
+                            if (DisplayTeamName && currFontSize >= MinFontSizeToDraw)
                             {
                                 GUIContent c = new GUIContent(teamName);
                                 Vector2 teamSize = GUI.skin.label.CalcSize(c);
 
-                                Vector2 start = new Vector2(rect.x - (5 + teamSize.x), rect.y);
+                                Vector2 start = new Vector2(rect.x - (5 + teamSize.x), rect.y - teamSize.y / 4);
                                 GUI.Label(new Rect(start, teamSize), c);
 
                                 if (subClass != null)
@@ -308,11 +389,51 @@ namespace MelonRajce.Features.Visuals
                                     {
                                         // Calculate the new position
                                         start.x = rect.x - (5 + subSize.x);
-                                        start.y += teamSize.y;
+                                        start.y += teamSize.y / 2;
 
                                         GUI.Label(new Rect(start, subSize), c1);
                                     }
                                 }
+                            }
+
+                            Inventory.SyncItemInfo? it = null; // Current item that the player is holding
+
+                            if (DisplayItem || DisplayAmmoBar)
+                            {
+                                // Gets the item from the players inventory
+                                foreach (Inventory.SyncItemInfo sii in inv.items)
+                                {
+                                    if (sii.uniq == inv.NetworkitemUniq)
+                                    {
+                                        it = sii;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Vector2 bottomDisplays = new Vector2(rect.x, rect.y + rect.height + 2);
+                            if (DisplayAmmoBar && wpn != null)
+                            {
+                                float paddingFromTop = 0;
+                                GUIContent c = new GUIContent(it.Value.durability.ToString());
+                                Vector2 ammoText = GUI.skin.label.CalcSize(c);
+
+                                if (currFontSize >= MinFontSizeToDraw)
+                                    paddingFromTop = (ammoText.y - 2) / 4;
+
+                                float width = 0;
+                                bottomDisplays.y += paddingFromTop;
+                                DrawLine(bottomDisplays, new Vector2(width = (it.Value.durability / wpn.maxAmmo) * rect.width, 0) + bottomDisplays, Color.blue);
+
+                                if (currFontSize >= MinFontSizeToDraw)
+                                    GUI.Label(new Rect(new Vector2(bottomDisplays.x + width + 2, bottomDisplays.y - ammoText.y / 2), ammoText), c);
+                            }
+                            if (DisplayItem && it != null)
+                            {
+                                Vector2 size = new Vector2(rect.width, rect.width);
+                                GUI.DrawTexture(new Rect(bottomDisplays, size), inv.availableItems[it.Value.id].icon);
+
+                                bottomDisplays.y += size.y;
                             }
 
                             GUI.contentColor = oldCol;
@@ -366,22 +487,21 @@ namespace MelonRajce.Features.Visuals
                                 break;
                             }
 
-                            Rect rect = DrawBoundingBox(r.bounds, Color.red, div);
+                            Rect rect = DrawBoundingBox(r.bounds, !isAimbotTarget ? Color.red : Color.white, div);
                             GUIStyle style = GUI.skin.label.Copy();
                             Color oldCol = GUI.contentColor;
 
                             GUI.contentColor = Color.red;
-                            GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
+                            int currFontSize = GUI.skin.label.fontSize = (int)Math.Min(rect.width / 2, 12);
 
-                            if (DisplayPlayerName)
+                            if (DisplayPlayerName && currFontSize >= MinFontSizeToDraw)
                             {
                                 GUIContent c = new GUIContent(player.GetComponent<NicknameSync>().myNick);
                                 Vector2 nameSize = GUI.skin.label.CalcSize(c);
 
                                 GUI.Label(new Rect(new Vector2(rect.x + ((rect.width / 2) - (nameSize.x / 2)), rect.y - 2 - nameSize.y), nameSize), c);
                             }
-
-                            if (DisplayTeamName)
+                            if (DisplayTeamName && currFontSize >= MinFontSizeToDraw)
                             {
                                 GUIContent c = new GUIContent("SCP");
                                 GUIContent c1 = new GUIContent(scpNum);
@@ -389,14 +509,14 @@ namespace MelonRajce.Features.Visuals
                                 Vector2 teamSize = GUI.skin.label.CalcSize(c);
                                 Vector2 numSize = GUI.skin.label.CalcSize(c1);
 
-                                Vector2 start = new Vector2(rect.x - (5 + teamSize.x), rect.y);
+                                Vector2 start = new Vector2(rect.x - (5 + teamSize.x), rect.y - teamSize.y / 4);
                                 GUI.Label(new Rect(start, teamSize), c);
 
                                 if (distance <= 150)
                                 {
                                     // Calculate the new position
                                     start.x = rect.x - (5 + numSize.x);
-                                    start.y += teamSize.y;
+                                    start.y += teamSize.y / 2;
 
                                     GUI.Label(new Rect(start, numSize), c1);
                                 }

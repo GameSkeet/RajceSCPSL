@@ -123,6 +123,7 @@
   <ItemGroup>
     <Compile Include="Extensions.cs" />
     <Compile Include="Features\Combat\ForceHeadshot.cs" />
+    <Compile Include="Features\Combat\SilentAim.cs" />
     <Compile Include="Features\Debug\DebugView.cs" />
     <Compile Include="Features\Feature.cs" />
     <Compile Include="Features\FeatureManager.cs" />
@@ -130,13 +131,14 @@
     <Compile Include="Features\Misc\Hitmarks.cs" />
     <Compile Include="Features\Movement\NoDoors.cs" />
     <Compile Include="Features\Movement\SilentWalk.cs" />
+    <Compile Include="Features\Visuals\CursorFix.cs" />
+    <Compile Include="Features\Visuals\ItemESP.cs" />
     <Compile Include="Features\Visuals\NoFlash.cs" />
     <Compile Include="Features\Visuals\PlayerESP.cs" />
     <Compile Include="Features\Visuals\FOVChanger.cs" />
     <Compile Include="Features\Visuals\SeeAllPlayers.cs" />
     <Compile Include="Features\Visuals\ViewmodelChanger.cs" />
     <Compile Include="Features\Visuals\WorldChanger.cs" />
-    <Compile Include="Features\Voice\NoBatteryUsage.cs" />
     <Compile Include="Hooks\CharacterClassManagerHook.cs" />
     <Compile Include="RajceMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -152,6 +154,9 @@
     <Compile Include="UI\Tabs\VoiceTab.cs" />
     <Compile Include="UI\UITab.cs" />
     <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\Voice\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Res\Data.assets" />
