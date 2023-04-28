@@ -22,50 +22,6 @@ namespace MelonRajce.Features.Visuals
         private Texture2D aimbotTargetImage = null;
         private SilentAim talent = null; // VS suggested this name and its kinda true cause it makes you talented
 
-        private Dictionary<Team, Team[]> TeamMateList = new Dictionary<Team, Team[]>()
-        {
-            { 
-                Team.CDP, 
-                new Team[] 
-                { 
-                    Team.CHI 
-                } 
-            },
-            {
-                Team.CHI,
-                new Team[]
-                {
-                    Team.CDP
-                }
-            },
-            {
-                Team.MTF,
-                new Team[]
-                {
-                    Team.RSC
-                }
-            },
-            {
-                Team.RSC, 
-                new Team[]
-                {
-                    Team.MTF
-                }
-            },
-            {
-                Team.TUT,
-                new Team[0]
-            },
-            {
-                Team.RIP,
-                new Team[0]
-            },
-            {
-                Team.SCP,
-                new Team[0]
-            }
-        };
-
         public override string Name { get; protected set; } = "Player ESP";
         public override string Description { get; protected set; } = "Shows info about a player on the screen";
         public override bool IsKeyBindable { get; protected set; } = false;
@@ -80,18 +36,6 @@ namespace MelonRajce.Features.Visuals
         internal bool DisplayAmmoBar = false;
         internal bool DisplayTeamName = false;
         internal bool DisplayPlayerName = false;
-
-        private bool IsTeamMate(Team myTeam, Team targetTeam)
-        {
-            if (myTeam == targetTeam)
-                return true;
-
-            Team[] teams = TeamMateList[myTeam];
-            if (teams.Length == 0)
-                return false;
-
-            return teams.Contains(targetTeam);
-        }
 
         private void DrawLine(Vector2 p1, Vector2 p2, Color c)
         {
@@ -185,7 +129,7 @@ namespace MelonRajce.Features.Visuals
                 }
 
                 Team team = ccm.klasy[ccm.curClass].team;
-                if (!DrawIfMyTeam || IsTeamMate(CharacterClassManagerHook.myTeam, team))
+                if (!DrawIfMyTeam && Utils.IsTeamMate(CharacterClassManagerHook.myTeam, team))
                     continue;
 
                 GameObject model = ccm.myModel;

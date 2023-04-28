@@ -1,17 +1,63 @@
-﻿using MelonRajce.Features.Visuals;
+﻿using MelonRajce.Hooks;
+using MelonRajce.Features.Visuals;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+using HarmonyLib;
 using UnityEngine;
 
 namespace MelonRajce.Features.Combat
 {
     internal class SilentAim : Feature
     {
+        [HarmonyPatch(typeof(WeaponManager))]
+        [HarmonyPatch("CallCmdShoot")]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPatch(new Type[] { typeof(GameObject), typeof(string), typeof(Vector3), typeof(Vector3), typeof(Vector3) })]
+        private static class Patch
+        {
+            private const float PositionShift = 5f;
+
+            private static SilentAim silent = FeatureManager.GetFeature<SilentAim>();
+
+            /*private static bool CheckValidShot(Transform t, Vector3 source, Vector3 target)
+            {
+                // Check if we are not under or above the target by 40 units
+                if (Math.Abs(silent.current.transform.position.y - t.position.y) > 40)
+                    return false;
+
+                // Check if we are not faking the source pos
+                if (Vector3.Distance(silent.current.transform.position, source) > 6.5f)
+                    return false;
+
+                // Check if we are not faking the target position
+                if (Vector3.Distance(t.position, target) > 6.5f)
+                    return false;
+
+                // Check if the shot does not go through a wall
+                return Physics.Linecast(source, target, silent.serverCollisions);
+            }*/
+
+            private static void Prefix(ref GameObject target, ref string hitboxType, Vector3 dir, ref Vector3 sourcePos, ref Vector3 targetPos)
+            {
+                if (!silent.IsActive)
+                    return;
+                if (silent.targetPlayer == null)
+                    return;
+
+                sourcePos = silent.current.transform.position;
+                target = silent.targetPlayer;
+                hitboxType = silent.TargetHitbox;
+                targetPos = target.transform.position;
+
+                if (silent.PenetrateWalls)
+                {
+                    sourcePos = sourcePos + new Vector3(0, -PositionShift, 0);
+                    targetPos = targetPos + new Vector3(0, -PositionShift, 0);
+                }
+            }
+        }
+
         public const int CIRCLE_STEPS = 360;
         public readonly Color CIRCLE_COLOR = Color.yellow;
 
@@ -19,8 +65,7 @@ namespace MelonRajce.Features.Combat
         private Camera current = null;
 
         private GameObject localPlayer = null;
-        private CharacterClassManager ccm = null;
-        private WeaponManager wpnManager = null;
+        private LayerMask serverCollisions;
 
         private Material lineMaterial = null;
         private Vector2[] CirclePoints = null;
@@ -34,8 +79,19 @@ namespace MelonRajce.Features.Combat
         public GameObject targetPlayer { get; private set; }
 
         public bool DrawFOVCircle = true;
-        public float pSilentFOV = 10f;
+        public bool FriendlyFire = false;
+        public bool PenetrateWalls = false;
 
+        public float pSilentFOV = 10f;
+        public string TargetHitbox = "Body";
+
+        private Camera GetCamera()
+        {
+            if (Camera.main != null)
+                return Camera.main;
+
+            return Camera.current;
+        }
         private bool CheckFOV(Vector3 pos, out float distance)
         {
             //Vector3.Angle(Camera.main.transform.forward, component.transform.position - Camera.main.transform.position)
@@ -44,13 +100,7 @@ namespace MelonRajce.Features.Combat
             distance = angle;
             return angle <= pSilentFOV / 1.5f;
         }
-        private Camera GetCamera()
-        {
-            if (Camera.main != null)
-                return Camera.main;
 
-            return Camera.current;
-        }
         private void DrawLine(Vector2 p1, Vector2 p2, Color c)
         {
             if (lineMaterial == null)
@@ -77,8 +127,7 @@ namespace MelonRajce.Features.Combat
         }
         public override void OnConnect()
         {
-            ccm = (localPlayer = PlayerManager.localPlayer).GetComponent<CharacterClassManager>();
-            wpnManager = localPlayer.GetComponent<WeaponManager>();
+            serverCollisions = (localPlayer = PlayerManager.localPlayer).GetComponent<WeaponManager>().raycastServerMask;
         }
 
         public override void OnUpdate()
@@ -89,7 +138,7 @@ namespace MelonRajce.Features.Combat
             base.OnUpdate(); // Due to keybinds
 
             float closest = 1000f;
-            current = Camera.main;
+            current = GetCamera();
 
             foreach (GameObject player in PlayerManager.singleton.players)
             {
@@ -106,7 +155,15 @@ namespace MelonRajce.Features.Combat
                 if (!CheckFOV(player.transform.position, out float dist))
                     continue;
 
-                RajceMain.logger.Msg("Angle: {0}", dist);
+                // Check if the player is a teammate
+                CharacterClassManager ccm = player.GetComponent<CharacterClassManager>();
+                if (!FriendlyFire && Utils.IsTeamMate(CharacterClassManagerHook.myTeam, ccm.klasy[ccm.curClass].team))
+                    continue;
+
+                // Check if the player is visible
+                if (!PenetrateWalls && Physics.Linecast(localPlayer.transform.position, player.transform.position, serverCollisions))
+                    continue;
+
                 if (closest > dist)
                 {
                     closest = dist;

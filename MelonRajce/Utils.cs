@@ -53,5 +53,24 @@ namespace MelonRajce
 
             return rect;
         }
+
+        public static bool IsTeamMate(Team me, Team player)
+        {
+            switch (me)
+            {
+                case Team.SCP:
+                    return player == Team.SCP;
+                case Team.MTF:
+                    return player == Team.MTF || player == Team.RSC;
+                case Team.CHI:
+                    return player == Team.CHI || player == Team.CDP;
+                case Team.RSC:
+                    return player == Team.RSC || player == Team.MTF;
+                case Team.CDP:
+                    return player == Team.CHI;
+            }
+
+            return false;
+        }
     }
 }
