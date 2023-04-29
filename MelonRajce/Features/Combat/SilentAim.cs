@@ -73,7 +73,7 @@ namespace MelonRajce.Features.Combat
 
         public override string Name { get; protected set; } = "Silent Aim";
         public override string Description { get; protected set; } = "Aims for you without you even noticing";
-        public override bool IsKeyBindable { get; protected set; } = true;
+        public override bool IsKeyBindable { get; protected set; } = false;
         public override KeyCode BindedKey { get; set; } = KeyCode.K;
 
         public GameObject targetPlayer { get; private set; }

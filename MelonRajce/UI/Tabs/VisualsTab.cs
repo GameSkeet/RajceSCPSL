@@ -121,10 +121,7 @@ namespace MelonRajce.UI.Tabs
                     }
 
                     // No Flash
-                    {
-                        NoFlash noFlash = FeatureManager.GetFeature<NoFlash>();
-                        DrawFeature(noFlash);
-                    }
+                    DrawFeature(FeatureManager.GetFeature<NoFlash>());
 
                     // Item ESP
                     {
@@ -139,6 +136,9 @@ namespace MelonRajce.UI.Tabs
 
                         EndGroup();
                     }
+
+                    // No Larry
+                    DrawFeature(FeatureManager.GetFeature<NoLarry>());
 
                     EndColumn();
                 }

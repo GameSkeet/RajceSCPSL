@@ -29,6 +29,7 @@ namespace MelonRajce.Features
                 new ItemESP(),
                 new NoFlash(),
                 new CursorFix(),
+                new NoLarry(),
 
                 // Movement
                 new NoDoors(),
