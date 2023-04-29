@@ -124,6 +124,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Features\Combat\ForceHeadshot.cs" />
     <Compile Include="Features\Combat\SilentAim.cs" />
+    <Compile Include="Features\Combat\WeaponMods.cs" />
     <Compile Include="Features\Debug\DebugView.cs" />
     <Compile Include="Features\Feature.cs" />
     <Compile Include="Features\FeatureManager.cs" />

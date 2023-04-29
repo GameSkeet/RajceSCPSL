@@ -37,6 +37,7 @@ namespace MelonRajce.Features
                 // Combat
                 new ForceHeadshot(),
                 new SilentAim(),
+                new WeaponMods(),
 
                 // Misc
                 new Electrician(),
