@@ -55,6 +55,12 @@ namespace MelonRajce.Features
             GetFeature<CursorFix>().IsActive = true;
         }
 
+        #region Keybinds
+
+
+
+        #endregion
+
         // Gets feature T if its registered
         public static T GetFeature<T>() where T : Feature
         {
@@ -81,7 +87,7 @@ namespace MelonRajce.Features
 
             // Invoke every OnConnect
             foreach (Feature feature in RegisteredFeatures)
-                feature.OnConnect();
+                try { feature.OnConnect(); } catch {}
         }
         public static void OnDisconnected()
         {
@@ -94,18 +100,20 @@ namespace MelonRajce.Features
 
             // Invoke every OnDisconnect
             foreach (Feature feature in RegisteredFeatures)
-                feature.OnDisconnect();
+                try { feature.OnDisconnect(); } catch {}
         }
 
         public static void FeatureUpdate()
         {
             foreach (Feature feature in ActiveFeatures)
-                feature.OnUpdate();
+                try { feature.OnUpdate(); } catch {}
         }
         public static void FeatureDraw()
         {
             foreach (Feature feature in ActiveFeatures)
-                feature.OnDraw();
+                try { feature.OnDraw(); } catch {}
+
+
         }
     }
 }
