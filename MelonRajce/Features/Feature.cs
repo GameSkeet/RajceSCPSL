@@ -59,7 +59,10 @@ namespace MelonRajce.Features
 
         // These methods are called when ever the activity of this feature is changed
         public virtual void OnEnable() {}
-        public virtual void OnDisable() {}
+        public virtual void OnDisable()
+        {
+            OnKeybindRelease(); // Release the keybind when the user disables the feature
+        }
 
         // These methods are called when ever our client joins/disconnects
         public virtual void OnConnect() {}

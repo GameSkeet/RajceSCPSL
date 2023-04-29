@@ -17,30 +17,13 @@ namespace MelonRajce.Features.Combat
         private static class Patch
         {
             private const float PositionShift = 5f;
-
             private static SilentAim silent = FeatureManager.GetFeature<SilentAim>();
-
-            /*private static bool CheckValidShot(Transform t, Vector3 source, Vector3 target)
-            {
-                // Check if we are not under or above the target by 40 units
-                if (Math.Abs(silent.current.transform.position.y - t.position.y) > 40)
-                    return false;
-
-                // Check if we are not faking the source pos
-                if (Vector3.Distance(silent.current.transform.position, source) > 6.5f)
-                    return false;
-
-                // Check if we are not faking the target position
-                if (Vector3.Distance(t.position, target) > 6.5f)
-                    return false;
-
-                // Check if the shot does not go through a wall
-                return Physics.Linecast(source, target, silent.serverCollisions);
-            }*/
 
             private static void Prefix(ref GameObject target, ref string hitboxType, Vector3 dir, ref Vector3 sourcePos, ref Vector3 targetPos)
             {
                 if (!silent.IsActive)
+                    return;
+                if (!silent.KeybindStatus)
                     return;
                 if (silent.targetPlayer == null)
                     return;
@@ -73,7 +56,7 @@ namespace MelonRajce.Features.Combat
 
         public override string Name { get; protected set; } = "Silent Aim";
         public override string Description { get; protected set; } = "Aims for you without you even noticing";
-        public override bool IsKeyBindable { get; protected set; } = false;
+        public override bool IsKeyBindable { get; protected set; } = true;
         public override KeyCode BindedKey { get; set; } = KeyCode.K;
 
         public GameObject targetPlayer { get; private set; }

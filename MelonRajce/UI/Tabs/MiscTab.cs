@@ -24,9 +24,11 @@ namespace MelonRajce.UI.Tabs
                 {
                     BeginColumn(colSize);
 
-                    Electrician electrician = FeatureManager.GetFeature<Electrician>();
+                    // Electrician
+                    DrawFeature(FeatureManager.GetFeature<Electrician>());
 
-                    DrawFeature(electrician);
+                    // Keybind window
+                    DrawToggle("Show keybinds", FeatureManager.DrawKeybindWindow, (elem, t) => FeatureManager.DrawKeybindWindow = t, 16);
 
                     EndColumn();
                 }
