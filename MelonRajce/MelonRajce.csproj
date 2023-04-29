@@ -128,7 +128,6 @@
     <Compile Include="Features\Debug\DebugView.cs" />
     <Compile Include="Features\Feature.cs" />
     <Compile Include="Features\FeatureManager.cs" />
-    <Compile Include="Features\Misc\AutoTesla.cs" />
     <Compile Include="Features\Misc\Electrician.cs" />
     <Compile Include="Features\Misc\Hitmarks.cs" />
     <Compile Include="Features\Movement\NoDoors.cs" />
