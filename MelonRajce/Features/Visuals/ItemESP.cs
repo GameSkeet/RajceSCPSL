@@ -27,6 +27,7 @@ namespace MelonRajce.Features.Visuals
         // Flags
         internal bool ShowItemName = false;
         internal bool ShowItemIcon = false;
+        internal bool UpscaleItem = false;
 
         private Bounds GetBoundsFromItem(Pickup pickup)
         {
@@ -324,6 +325,12 @@ namespace MelonRajce.Features.Visuals
         public override void OnUpdate()
         {
             base.OnUpdate(); // For keybinds
+
+            if (!UpscaleItem)
+            {
+                UpScaledPickup = null;
+                return;
+            }
 
             Vector2 curPos = Input.mousePosition.ToV2();
             curPos.y = Screen.height - curPos.y; // Make the position on the Y not fucked

@@ -2,6 +2,7 @@
 using MelonRajce.Features.Debug;
 using MelonRajce.Features.Voice;
 using MelonRajce.Features.Combat;
+using MelonRajce.Features.Player;
 using MelonRajce.Features.Visuals;
 using MelonRajce.Features.Movement;
 
@@ -23,6 +24,8 @@ namespace MelonRajce.Features
             RegisteredFeatures = new List<Feature>()
             {
                 // Player
+                new Noclip(),
+
                 // Visuals
                 new SeeAllPlayers(),
                 new FOVChanger(),
@@ -97,8 +100,8 @@ namespace MelonRajce.Features
             GUI.contentColor = oldColor;
             GUI.skin.label.fontSize = oldSize; // Restore the old font size
 
-            if (widest < 40)
-                widest = 40;
+            if (widest < 100)
+                widest = 100;
 
             keybindsRect.size = new Vector2(widest + 10, pos.y + 5);
         }

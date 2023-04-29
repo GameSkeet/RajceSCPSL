@@ -133,6 +133,7 @@ namespace MelonRajce.UI.Tabs
                         {
                             esp.IsActive = t;
                         }, 14);
+                        DrawToggle("Upscale item on hover", esp.UpscaleItem, (elem, t) => esp.UpscaleItem = t, 14);
 
                         EndGroup();
                     }
