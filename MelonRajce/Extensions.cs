@@ -43,5 +43,50 @@ namespace MelonRajce
         }
 
         public static GUIStyle Copy(this GUIStyle style) => new GUIStyle(style);
+        public static void Copy(this GUISettings settings, ref GUISkin gs)
+        {
+            GUISettings s = gs.settings ?? new GUISettings();
+
+            s.cursorColor = settings.cursorColor;
+            s.cursorFlashSpeed = settings.cursorFlashSpeed;
+            s.doubleClickSelectsWord = settings.doubleClickSelectsWord;
+            s.selectionColor = settings.selectionColor;
+            s.tripleClickSelectsLine = settings.tripleClickSelectsLine;
+        }
+        public static GUISkin Copy(this GUISkin skin)
+        {
+            GUISkin gs = new GUISkin();
+            gs.box = skin.box.Copy();
+            gs.button = skin.button.Copy();
+
+            GUIStyle[] styles = new GUIStyle[skin.customStyles.Length];
+            Array.Copy(skin.customStyles, styles, styles.Length);
+            gs.customStyles = styles;
+
+            gs.font = skin.font;
+            gs.hideFlags = skin.hideFlags;
+            gs.horizontalScrollbar = skin.horizontalScrollbar.Copy();
+            gs.horizontalScrollbarLeftButton = skin.horizontalScrollbarLeftButton.Copy();
+            gs.horizontalScrollbarRightButton = skin.horizontalScrollbarRightButton.Copy();
+            gs.horizontalScrollbarThumb = skin.horizontalScrollbarThumb.Copy();
+            gs.horizontalSlider = gs.horizontalSlider.Copy();
+            gs.horizontalSliderThumb = skin.horizontalSliderThumb.Copy();
+            gs.label = skin.label.Copy();
+            gs.name = skin.name;
+            gs.scrollView = skin.scrollView.Copy();
+            skin.settings.Copy(ref gs);
+            gs.textArea = skin.textArea.Copy();
+            gs.textField = skin.textField.Copy();
+            gs.toggle = skin.toggle.Copy();
+            gs.verticalScrollbar = skin.verticalScrollbar.Copy();
+            gs.verticalScrollbarDownButton = skin.verticalScrollbarDownButton.Copy();
+            gs.verticalScrollbarThumb = skin.verticalScrollbarThumb.Copy();
+            gs.verticalScrollbarUpButton = skin.verticalScrollbarUpButton.Copy();
+            gs.verticalSlider = gs.verticalSlider.Copy();
+            gs.verticalSliderThumb = skin.verticalSliderThumb.Copy();
+            gs.window = skin.window.Copy();
+
+            return gs;
+        }
     }
 }

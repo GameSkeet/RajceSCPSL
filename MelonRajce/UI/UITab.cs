@@ -1,9 +1,7 @@
 ﻿using MelonRajce.Features;
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -44,8 +42,7 @@ namespace MelonRajce.UI
                 Type = Menu.ElementType.Label, // Set the element type to label
 
                 Content = new GUIContent(text), // Create the content for the label
-                Style = GUI.skin.label.Copy(), // Set the label style
-
+                UsedStyle = GUI.skin.label,
                 FontSize = fontSize // Add the label font size
             };
 
@@ -62,9 +59,9 @@ namespace MelonRajce.UI
                 Type = Menu.ElementType.Button, // Set the element type
 
                 Content = new GUIContent(text), // Set the button content
-                Style = GUI.skin.button.Copy(), // Copy the button style
-
+                UsedStyle = GUI.skin.button,
                 FontSize = fontSize, // Set custom fontsize
+
                 OnAction = (o) =>
                 {
                     // Check if the onClick is set
@@ -87,8 +84,7 @@ namespace MelonRajce.UI
                 RedrawUIOnAction = redrawOnAction, // Set if the page should redraw after toggle has been un/checked
 
                 Content = new GUIContent(text), // Set the toggle content
-                Style = GUI.skin.toggle.Copy(), // Copy the toggle style
-
+                UsedStyle = GUI.skin.toggle,
                 FontSize = fontSize, // Set custom fontsize
 
                 ToggleCurrentValue = v, // Set the default toggle value
@@ -114,7 +110,7 @@ namespace MelonRajce.UI
                 Type = Menu.ElementType.Slider, // Set the element type
 
                 Content = new GUIContent(text), // Create the content for the slider
-                Style = GUI.skin.label.Copy(), // Copy the label style
+                UsedStyle = GUI.skin.horizontalSlider,
                 FontSize = fontSize, // Set the custom fontsize
 
                 OnAction = (o) =>
@@ -281,7 +277,6 @@ namespace MelonRajce.UI
                 MinSizeY = minY, // Set the min size for the Y
 
                 Content = new GUIContent(header), // Create the content for the group
-                Style = GUI.skin.box.Copy(), // Copy the style of the box
                 FontSize = fontSize, // Set the custom fontsize
             };
 

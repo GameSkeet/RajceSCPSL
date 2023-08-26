@@ -87,7 +87,6 @@ namespace MelonRajce.Features.Combat
             }
         }
 
-
         public override void OnEnable() => ModWeapons();
         public override void OnDisable()
         {
@@ -110,9 +109,6 @@ namespace MelonRajce.Features.Combat
             }
         }
 
-        public override void OnConnect()
-        {
-            
-        }
+        public override void OnConnect() => ModWeapons();
     }
 }

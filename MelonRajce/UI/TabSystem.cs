@@ -75,11 +75,13 @@ namespace MelonRajce.UI
 
             GUI.Box(rect, ""); // Create the background for the tabs
 
-            Vector2 size = new Vector2(rect.width - 10, rect.height - (15 + 20)); // Calculate the space left with the padding added
+            //Vector2 size = new Vector2(rect.width - 10, rect.height - (15 + 20)); // Calculate the space left with the padding added
+            Vector2 size = rect.size;
 
-            // Adds the offset (25 cause of the topbar)
-            rect.x += 10;
-            rect.y += 25;
+            // Add offsets to the icon isn't too close to border
+            if (m_tIcon != null)
+                rect.x += 5;
+            rect.y += 5;
 
             // Check if the texture is valid
             if (m_tIcon != null)
@@ -93,18 +95,13 @@ namespace MelonRajce.UI
                     tex.Apply(); // Apply it
                 }
 
-                rect.size = new Vector2(size.y, size.y); // Gets the total size for the image
+                rect.size = new Vector2(size.y - 10, size.y - 10); // Gets the total size for the image
                 GUI.DrawTexture(rect, m_tIcon, ScaleMode.StretchToFill); // Draws the Icon
 
-                rect.position += new Vector2(size.y + 5, -5); // Offset the title
-                GUIContent c = new GUIContent("Rajce"); // Creates the content that will be used to calc the size
-                GUIStyle label = GUI.skin.label.Copy(); // Copy the label so we can safely change the values
-
-                size = orig.size - new Vector2(rect.x, 15 + 20); // Calculate the size for the tab buttons
+                size += new Vector2(size.y - 15, 0);
             }
 
             GUIStyle button = GUI.skin.button.Copy(); // Copy the button so we can safely change the values
-
             GUI.skin.button.fontSize = 14; // Set the font size
 
             // Check if we have already calculated this value
@@ -120,9 +117,6 @@ namespace MelonRajce.UI
                 }
             }
 
-            if (m_tIcon != null)
-                rect.y += 5; // Add 5 cause of the -5 vector in the icon draw
-
             float posX = m_fStartPos.Value; // Get the value of the middle
             foreach (var tab in Tabs)
             {
@@ -130,7 +124,7 @@ namespace MelonRajce.UI
                 Vector2 vec = GUI.skin.button.CalcSize(c); // Calc the size
 
                 // Draw the button
-                if (GUI.Button(new Rect(rect.x + posX, rect.y, vec.x, size.y), c))
+                if (GUI.Button(new Rect(rect.x + posX, rect.y, vec.x, size.y - 10), c))
                 {
                     // Check if the callback is set
                     if (m_cOnSelected != null)
@@ -145,7 +139,7 @@ namespace MelonRajce.UI
 
             GUI.skin.button = button; // Restore the button
 
-            orig.y += orig.height; // Add the height so the menu can draw the content correctly
+            orig.y += orig.height + 20; // Add the height so the menu can draw the content correctly (+20 cause topbar)
         }
     }
 }

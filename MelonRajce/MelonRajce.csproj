@@ -55,6 +55,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>E:\SCPSL MP1\SCPSL_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>E:\SCPSL MP1\SCPSL_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -130,10 +133,12 @@
     <Compile Include="Features\FeatureManager.cs" />
     <Compile Include="Features\Misc\Electrician.cs" />
     <Compile Include="Features\Misc\Hitmarks.cs" />
+    <Compile Include="Features\Misc\PlayerListColors.cs" />
     <Compile Include="Features\Movement\NoDoors.cs" />
     <Compile Include="Features\Movement\SilentWalk.cs" />
     <Compile Include="Features\Player\Noclip.cs" />
     <Compile Include="Features\Visuals\CursorFix.cs" />
+    <Compile Include="Features\Visuals\Fullbright.cs" />
     <Compile Include="Features\Visuals\ItemESP.cs" />
     <Compile Include="Features\Visuals\NoFlash.cs" />
     <Compile Include="Features\Visuals\NoLarry.cs" />
@@ -159,7 +164,6 @@
     <Compile Include="UI\UITab.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Res\Data.assets" />
   </ItemGroup>

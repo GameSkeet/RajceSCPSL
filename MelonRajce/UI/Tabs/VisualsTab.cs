@@ -141,6 +141,9 @@ namespace MelonRajce.UI.Tabs
                     // No Larry
                     DrawFeature(FeatureManager.GetFeature<NoLarry>());
 
+                    // Fullbright
+                    DrawFeature(FeatureManager.GetFeature<Fullbright>());
+
                     EndColumn();
                 }
 

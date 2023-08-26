@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using MelonRajce.UI;
 
 namespace MelonRajce.Features
 {
@@ -36,6 +37,7 @@ namespace MelonRajce.Features
                 new NoFlash(),
                 new CursorFix(),
                 new NoLarry(),
+                new Fullbright(),
 
                 // Movement
                 new NoDoors(),
@@ -49,6 +51,7 @@ namespace MelonRajce.Features
                 // Misc
                 new Electrician(),
                 new Hitmarks(),
+                new PlayerListColors(),
 
                 // Voice
                 new ListenAll(),
@@ -60,6 +63,7 @@ namespace MelonRajce.Features
             };
 
             GetFeature<CursorFix>().IsActive = true;
+            GetFeature<PlayerListColors>().IsActive = true;
         }
 
         #region Keybinds
@@ -201,7 +205,10 @@ namespace MelonRajce.Features
                 try { feature.OnDraw(); } catch {}
 
             if (DrawKeybindWindow)
+            {
+                GUI.skin = Menu.MenuSkin ?? Menu.DefaultSkin;
                 GUI.Window(1, keybindsRect, DrawKeybinds, "Keybinds");
+            }
         }
     }
 }

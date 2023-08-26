@@ -2,10 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -71,7 +67,7 @@ namespace MelonRajce.UI
 
             // Data for this element to be rendered
             public GUIContent Content = new GUIContent(); // Content to draw
-            public GUIStyle Style = null; // The unity style for this element
+            public GUIStyle UsedStyle = null;
             public int? FontSize = null; // (null means use the fontSize from the copied Style)
 
             // Offsets
@@ -136,14 +132,13 @@ namespace MelonRajce.UI
 
                     case ElementType.Slider:
                         {
-                            // Check if the element uses a custom fontsize
-                            if (FontSize != null)
-                                Style.fontSize = FontSize.Value; // Set the fontsize
+                            GUIStyle style = GUI.skin.horizontalSlider.Copy();
+                            style.fontSize = FontSize ?? 0;
 
                             // Check if some header text is set
                             if (!string.IsNullOrEmpty(Content.text))
                             {
-                                result += Style.CalcSize(Content); // Calculate the size of the header
+                                result += style.CalcSize(Content); // Calculate the size of the header
 
                                 result.y += 2; // Add space between the slider and header
                             }
@@ -155,15 +150,17 @@ namespace MelonRajce.UI
                                 result.x = SliderSize.x; // Set the slider size as the wides
 
                             result.x += 5; // Add 5 to x cause of the space between slider and value display
-                            Style.fontSize = (int)SliderSize.y; // Set the fontsize to slider height cause we want the display to be tall as the slider
-                            result.x += Style.CalcSize(new GUIContent(WholeNumberSlider ? SliderMax.ToString() : SliderMax.ToString().Rep(1))).x; // Add the display text width to the total
+                            style.fontSize = (int)SliderSize.y; // Set the fontsize to slider height cause we want the display to be tall as the slider
+                            result.x += style.CalcSize(new GUIContent(WholeNumberSlider ? SliderMax.ToString() : SliderMax.ToString().Rep(1))).x; // Add the display text width to the total
 
                             break;
                         }
                     case ElementType.FeatureToggle:
                         {
-                            // Old styles
                             GUIStyle toggle = GUI.skin.toggle.Copy();
+                            toggle.fixedWidth = 0;
+                            toggle.fixedHeight = 0;
+
                             GUIStyle label = GUI.skin.label.Copy();
                             GUIStyle button = GUI.skin.button.Copy();
 
@@ -171,15 +168,15 @@ namespace MelonRajce.UI
                             if (FontSize != null)
                                 fontsize = FontSize.Value; // Set the custom fontsize
 
-                            GUI.skin.toggle.fontSize = fontsize; // Header size
-                            GUI.skin.label.fontSize = fontsize - 2; // Description size
-                            GUI.skin.button.fontSize = fontsize - 2; // Keybind size
+                            toggle.fontSize = fontsize; // Header size
+                            label.fontSize = fontsize - 2; // Description size
+                            button.fontSize = fontsize - 2; // Keybind size
 
-                            Vector2 toggleSize = GUI.skin.toggle.CalcSize(new GUIContent(Feature.Name)); // Calculates the size of the toggle
+                            Vector2 toggleSize = toggle.CalcSize(new GUIContent(Feature.Name)); // Calculates the size of the toggle
                             result.y += toggleSize.y; // Add the height to the total
 
-                            Vector2 buttonSize = GUI.skin.button.CalcSize(new GUIContent("DEFAULT")); // Button size
-                            Vector2 labelSize = GUI.skin.label.CalcSize(new GUIContent(Feature.Description)); // Label size
+                            Vector2 buttonSize = button.CalcSize(new GUIContent("DEFAULT")); // Button size
+                            Vector2 labelSize = label.CalcSize(new GUIContent(Feature.Description)); // Label size
 
                             result.y += 2; // Add the spacing between the elements
 
@@ -191,12 +188,6 @@ namespace MelonRajce.UI
 
                             result.y += labelSize.y; // Add the label height
                             result.x += widest; // Add the widest element
-
-
-                            // Restore the styles
-                            GUI.skin.toggle = toggle;
-                            GUI.skin.label = label;
-                            GUI.skin.button = button;
 
                             break;
                         }
@@ -269,11 +260,10 @@ namespace MelonRajce.UI
                         }
                     case ElementType.Group:
                         {
-                            // Check if we want to use custom fontsize
-                            if (FontSize != null)
-                                Style.fontSize = FontSize.Value; // Set the fontsize
+                            GUIStyle style = GUI.skin.box.Copy();
+                            style.fontSize = FontSize ?? 0;
 
-                            Vector2 group = Style.CalcSize(Content); // Calculate the box size
+                            Vector2 group = style.CalcSize(Content); // Calculate the box size
                             result = new Vector2(BorderOffset * 2, group.y + BorderOffset * 2); // We want to multiply the border offset by 2 cause we want the space on every side
 
                             float widestElem = 0f;
@@ -311,11 +301,13 @@ namespace MelonRajce.UI
                     // Calculates the size for the wrapper element
                     default:
                         {
-                            // Check if want to use custom fontsize
-                            if (FontSize != null)
-                                Style.fontSize = FontSize.Value; // Set the fontsize
+                            GUIStyle style = UsedStyle.Copy();
+                            style.fixedWidth = 0;
+                            style.fixedHeight = 0;
 
-                            result = Style.CalcSize(Content); // Calculate the size for the wrapper element
+                            style.fontSize = FontSize ?? 0;
+
+                            result = style.CalcSize(Content); // Calculate the size for the wrapper element
 
                             break;
                         }
@@ -343,6 +335,8 @@ namespace MelonRajce.UI
         private static Vector2 m_vScrollPosition = Vector2.zero; // The position where the scroller is at
 
         // Menu info
+        public static GUISkin MenuSkin = null;
+        public static GUISkin DefaultSkin = null;
         public static bool IsVisible { get; private set; } = true;
 
         // Draws the elements/page of the current tab
@@ -362,11 +356,8 @@ namespace MelonRajce.UI
 
                         case ElementType.Label:
                             {
-                                // Check if the element has custom fontsize
-                                if (elem.FontSize != null)
-                                    elem.Style.fontSize = elem.FontSize.Value; // Set the fontsize
-
-                                GUI.skin.label = elem.Style; // Use the current style
+                                int oldSize = GUI.skin.label.fontSize;
+                                GUI.skin.label.fontSize = elem.FontSize ?? 0;
 
                                 Vector2 eSize = elem.CalcSize();
                                 Rect cRect = rect.Copy();
@@ -385,15 +376,14 @@ namespace MelonRajce.UI
                                         rect.y += cRect.size.y + elem.OffsetY; // Add the height of the label
                                     else rect.x += cRect.size.x + elem.OffsetX; // Add the width of the label
 
+                                GUI.skin.label.fontSize = oldSize;
+
                                 break;
                             }
                         case ElementType.Button:
                             {
-                                // Check if the element has custom fontsize
-                                if (elem.FontSize != null)
-                                    elem.Style.fontSize = elem.FontSize.Value; // Set the fontsize
-
-                                GUI.skin.button = elem.Style; // Use the current style
+                                int oldSize = GUI.skin.button.fontSize;
+                                GUI.skin.button.fontSize = elem.FontSize ?? 0;
 
                                 // Draw the button and check if the OnAction isn't null
                                 if (GUI.Button(Utils.SetSize(ref rect, elem.CalcSize()), elem.Content) && elem.OnAction != null)
@@ -403,15 +393,14 @@ namespace MelonRajce.UI
                                     rect.y += rect.size.y + elem.OffsetY; // Add the height of the button
                                 else rect.x += rect.size.x + elem.OffsetX; // Add the width of the button
 
+                                GUI.skin.button.fontSize = oldSize;
+
                                 break;
                             }
                         case ElementType.Checkbox:
                             {
-                                // Check if the element has custom fontsize
-                                if (elem.FontSize != null)
-                                    elem.Style.fontSize = elem.FontSize.Value; // Set the fontsize
-
-                                GUI.skin.toggle = elem.Style; // Use the current style
+                                int oldSize = GUI.skin.toggle.fontSize;
+                                GUI.skin.toggle.fontSize = elem.FontSize ?? 0;
 
                                 Vector2 eSize = elem.CalcSize();
                                 Rect cRect = rect.Copy();
@@ -441,6 +430,8 @@ namespace MelonRajce.UI
                                     rect.y += cRect.size.y + elem.OffsetY; // Add the height of the checkbox
                                 else rect.x += cRect.size.x + elem.OffsetX; // Add the width of the checkbox
 
+                                GUI.skin.toggle.fontSize = oldSize;
+
                                 break;
                             }
 
@@ -450,11 +441,8 @@ namespace MelonRajce.UI
 
                         case ElementType.Slider:
                             {
-                                // Check if element uses a custom fontsize
-                                if (elem.FontSize != null)
-                                    elem.Style.fontSize = elem.FontSize.Value; // Set the fontsize
-
-                                GUI.skin.label = elem.Style; // User current style
+                                int oldSize = GUI.skin.label.fontSize;
+                                GUI.skin.label.fontSize = elem.FontSize ?? 0;
 
                                 Rect cRect = rect.Copy(); // Copy the rect
                                 Vector2 lSize = Vector2.zero; // The size of the slider
@@ -500,6 +488,8 @@ namespace MelonRajce.UI
                                 if (drawAsColumn)
                                     rect.y += lSize.y + elem.OffsetY; // Add the height to rect
                                 else rect.x += lSize.x + elem.OffsetX; // Add the width to rect
+
+                                GUI.skin.label.fontSize = oldSize;
 
                                 break;
                             }
@@ -649,11 +639,8 @@ namespace MelonRajce.UI
                             }
                         case ElementType.Group:
                             {
-                                // Check if the element has custom fontsize
-                                if (elem.FontSize != null)
-                                    elem.Style.fontSize = elem.FontSize.Value; // Set the fontsize
-
-                                GUI.skin.box = elem.Style; // use current style
+                                int oldSize = GUI.skin.box.fontSize;
+                                GUI.skin.box.fontSize = elem.FontSize ?? 0;
 
                                 Vector2 eSize = elem.CalcSize(); // Calculate the size so we can use it for centering if enabled
                                 Rect cRect = rect.Copy(); // Copy the rect so we dont need to worry about it begin changed
@@ -674,6 +661,8 @@ namespace MelonRajce.UI
                                 if (drawAsColumn)
                                     rect.y += cRect.size.y + elem.OffsetY; // Add the height of the group
                                 else rect.x += cRect.size.x + elem.OffsetX; // Add the width of the group
+
+                                GUI.skin.box.fontSize = oldSize;
 
                                 break;
                             }
@@ -697,14 +686,16 @@ namespace MelonRajce.UI
                 return;
             }
 
-            Rect rect = new Rect(0, 0, MenuSize.x, 80); // Create the main rect
+            Rect rect = new Rect(5, 20, MenuSize.x - 10, 60); // Create the main rect
 
             m_tabSystem.OnGUI(ref rect); // Draw the tabbar
 
             if (CurrentTab != null)
             {
-                Vector2 pagePos = new Vector2(0, rect.height); // The position to start drawing the page at
-                Vector2 pageSize = new Vector2(MenuSize.x, MenuSize.y - rect.height); // The size of the page
+                // + 20 (topbar stuff), + 5 (offset from border)
+                Vector2 pagePos = new Vector2(5, rect.height + 20 + 5); // The position to start drawing the page at
+                // + 20 (topbar stuff), + 10 (offset)
+                Vector2 pageSize = new Vector2(MenuSize.x - 10, MenuSize.y - (rect.height + 20 + 10)); // The size of the page
 
                 Vector2 targetSize = CurrentTab.DrawTab(ReDrawPage); // Draws the page
 
@@ -800,10 +791,14 @@ namespace MelonRajce.UI
 
         public static void OnGUI()
         {
+            if (DefaultSkin == null)
+                DefaultSkin = GUI.skin.Copy();
+
             // Check if the menu is visible
             if (!IsVisible)
                 return;
 
+            GUI.skin = MenuSkin ?? DefaultSkin;
             GUI.Window(0, m_rWindow, OnMenuDraw, "Rajce - " + m_tabSystem.CurrentTab);
         }
 
