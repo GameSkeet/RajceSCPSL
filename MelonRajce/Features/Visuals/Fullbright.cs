@@ -9,7 +9,7 @@ namespace MelonRajce.Features.Visuals
     {
         [HarmonyPatch(typeof(RenderSettings))]
         [HarmonyPatch("get_ambientLight")]
-        [HarmonyPatch(MethodType.Getter)]
+        [HarmonyPatch(MethodType.Normal)]
         private static class Patch
         {
             private static Fullbright b = FeatureManager.GetFeature<Fullbright>();
@@ -17,7 +17,10 @@ namespace MelonRajce.Features.Visuals
             private static void Postfix(ref Color __result)
             {
                 if (b.IsActive)
-                    __result = new Color(0, 0, 0, 0);
+                {
+                    float f = b.Brightness / 100.0f;
+                    __result = new Color(f, f, f);
+                }
             }
         }
 
@@ -25,5 +28,7 @@ namespace MelonRajce.Features.Visuals
         public override string Description { get; protected set; } = "Makes your map brighter";
         public override bool IsKeyBindable { get; protected set; } = false;
         public override KeyCode BindedKey { get; set; }
+
+        public float Brightness = 20;
     }
 }

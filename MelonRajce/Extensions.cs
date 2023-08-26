@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -87,6 +83,57 @@ namespace MelonRajce
             gs.window = skin.window.Copy();
 
             return gs;
+        }
+
+        public static Color Darken(this Color col, float by)
+        {
+            return new Color(Math.Max(col.r - by, 0f), Math.Max(col.g - by, 0f), Math.Max(col.b - by, 0f), col.a);
+        }
+        public static Color Darken32(this Color col, int by) => col.Darken(by / 255.0f);
+        public static Color32 Darken(this Color32 col, int by)
+        {
+            return new Color32((byte)Math.Max(col.r - by, 0), (byte)Math.Max(col.g - by, 0), (byte)Math.Max(col.b - by, 0), col.a);
+        }
+
+        public static Color GetRoleColor(this CharacterClassManager ccm)
+        {
+            int cur = ccm.curClass;
+            Team team = ccm.klasy[cur].team;
+
+            switch (team)
+            {
+                case Team.SCP:
+                    return Color.red;
+                case Team.MTF:
+                    {
+                        switch (cur)
+                        {
+                            case 4: // SCI MTF
+                            case 11: // LIE MTF
+                                return new Color32(34, 130, 227, 255);
+
+                            case 12: // COM MTF
+                                return Color.blue;
+                            case 13: // CAD MTF
+                                return Color.cyan;
+                            case 15: // GUARD
+                                return Color.gray;
+                        }
+                    }
+                    break;
+                case Team.CHI:
+                    return Color.green;
+                case Team.RSC:
+                    return Color.yellow;
+                case Team.CDP:
+                    return new Color32(232, 117, 9, 255);
+                case Team.RIP:
+                    return Color.black;
+                case Team.TUT:
+                    return Color.magenta;
+            }
+
+            return Color.white;
         }
     }
 }

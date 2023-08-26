@@ -142,6 +142,7 @@
     <Compile Include="Features\Visuals\ItemESP.cs" />
     <Compile Include="Features\Visuals\NoFlash.cs" />
     <Compile Include="Features\Visuals\NoLarry.cs" />
+    <Compile Include="Features\Visuals\PlayerChams.cs" />
     <Compile Include="Features\Visuals\PlayerESP.cs" />
     <Compile Include="Features\Visuals\FOVChanger.cs" />
     <Compile Include="Features\Visuals\SeeAllPlayers.cs" />

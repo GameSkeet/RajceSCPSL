@@ -1,12 +1,17 @@
 ﻿using MelonRajce.Features;
 using MelonRajce.Features.Visuals;
 
+using System;
+using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace MelonRajce.UI.Tabs
 {
     internal class VisualsTab : UITab
     {
+        private List<Menu.Element> chamsRadios;
+
         protected override void OnDraw()
         {
             float colSize = (Menu.MenuSize.x - (OFFSET_FROM_BORDERS * 2) - GUI.skin.verticalScrollbarThumb.fixedWidth) / 2;
@@ -70,7 +75,6 @@ namespace MelonRajce.UI.Tabs
                         // Flags
                         {
                             AddPadding(0, 5);
-
                             BeginGroup("Flags", 14).CenterX = true;
 
                             DrawToggle("Team name", esp.DisplayTeamName, (elem, t) =>
@@ -89,6 +93,33 @@ namespace MelonRajce.UI.Tabs
                             {
                                 esp.DisplayAmmoBar = t;
                             });
+
+                            EndGroup();
+                        }
+
+                        EndGroup();
+                    }
+
+                    // Player Chams
+                    {
+                        BeginGroup("Player Chams", 16).CenterX = true;
+
+                        PlayerChams chams = FeatureManager.GetFeature<PlayerChams>();
+
+                        DrawToggle("Enable", chams.IsActive, (elem, t) => chams.IsActive = t, 14);
+
+                        // Chams style
+                        {
+                            AddPadding(0, 5);
+                            BeginGroup("Chams style", 14).CenterX = true;
+
+                            foreach (int val in Enum.GetValues(typeof(Utils.ChamType)))
+                                DrawRadioButton(ref chamsRadios, ((Utils.ChamType)val).ToString(), (elem, t) =>
+                                {
+                                    if (t)
+                                        chams.ChamsType = (Utils.ChamType)val;
+
+                                }, toggleFromStart: val == (int)chams.ChamsType);
 
                             EndGroup();
                         }
@@ -142,7 +173,12 @@ namespace MelonRajce.UI.Tabs
                     DrawFeature(FeatureManager.GetFeature<NoLarry>());
 
                     // Fullbright
-                    DrawFeature(FeatureManager.GetFeature<Fullbright>());
+                    {
+                        Fullbright fb = FeatureManager.GetFeature<Fullbright>();
+                        DrawFeature(fb, redrawOnAction: true);
+                        if (fb.IsActive)
+                            DrawSlider("Brightness", fb.Brightness, (elem, val) => fb.Brightness = val);
+                    }
 
                     EndColumn();
                 }

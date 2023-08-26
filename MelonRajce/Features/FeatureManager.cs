@@ -38,6 +38,7 @@ namespace MelonRajce.Features
                 new CursorFix(),
                 new NoLarry(),
                 new Fullbright(),
+                new PlayerChams(),
 
                 // Movement
                 new NoDoors(),

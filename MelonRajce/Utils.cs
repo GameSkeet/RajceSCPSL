@@ -9,6 +9,13 @@ namespace MelonRajce
 {
     internal static class Utils
     {
+        public enum ChamType
+        {
+            Flat,
+            Shaded,
+            BringToFront
+        }
+
         private static Dictionary<string, AssetBundle> Bundles = new Dictionary<string, AssetBundle>();        
 
         public static byte[] ReadResource(string name)
