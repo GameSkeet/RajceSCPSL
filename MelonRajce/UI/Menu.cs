@@ -744,8 +744,8 @@ namespace MelonRajce.UI
                 IsVisible = !IsVisible; // Toggle the window
                 Event.current.Use(); // Stop the next input for this key
             }
-            if (CursorManager.singleton != null)
-                CursorManager.singleton.debuglogopen = IsVisible; // Disable/Enable the player input
+            
+            CursorManager.debuglogopen = IsVisible; // Disable/Enable the player input
 
             Vector2 CurPos = Input.mousePosition.ToV2(); // Gets the current mouse postion
             CurPos.y = Screen.height - CurPos.y; // Fixes the mouse position to start from the top left instead of the bottom left
