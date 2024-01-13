@@ -7,7 +7,7 @@ namespace MelonRajce.Features.Visuals
 {
     internal class Fullbright : Feature
     {
-        [HarmonyPatch(typeof(RenderSettings))]
+        /*[HarmonyPatch(typeof(RenderSettings))]
         [HarmonyPatch("get_ambientLight")]
         [HarmonyPatch(MethodType.Normal)]
         private static class Patch
@@ -22,7 +22,7 @@ namespace MelonRajce.Features.Visuals
                     __result = new Color(f, f, f);
                 }
             }
-        }
+        }*/
 
         public override string Name { get; protected set; } = "Fullbright";
         public override string Description { get; protected set; } = "Makes your map brighter";

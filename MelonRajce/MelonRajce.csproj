@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro">
       <HintPath>E:\SCPSL MP1\SCPSL_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>E:\SCPSL MP1\SCPSL_Data\Managed\UnityEngine.dll</HintPath>
@@ -126,6 +127,7 @@
   <ItemGroup>
     <Compile Include="Extensions.cs" />
     <Compile Include="Features\Combat\ForceHeadshot.cs" />
+    <Compile Include="Features\Combat\NewSilentAim.cs" />
     <Compile Include="Features\Combat\SilentAim.cs" />
     <Compile Include="Features\Combat\WeaponMods.cs" />
     <Compile Include="Features\Debug\DebugView.cs" />
@@ -134,6 +136,7 @@
     <Compile Include="Features\Misc\Electrician.cs" />
     <Compile Include="Features\Misc\Hitmarks.cs" />
     <Compile Include="Features\Misc\PlayerListColors.cs" />
+    <Compile Include="Features\Movement\LoudWalk.cs" />
     <Compile Include="Features\Movement\NoDoors.cs" />
     <Compile Include="Features\Movement\SilentWalk.cs" />
     <Compile Include="Features\Player\Noclip.cs" />

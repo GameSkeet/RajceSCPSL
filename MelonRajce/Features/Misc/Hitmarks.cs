@@ -26,7 +26,8 @@ namespace MelonRajce.Features.Misc
             COD,
             Minecraft,
             Negr,
-            Chipsy
+            Chipsy,
+            Kick
         }
 
         private bool m_bLoadedSounds = false;

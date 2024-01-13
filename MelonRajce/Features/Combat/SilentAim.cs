@@ -115,10 +115,10 @@ namespace MelonRajce.Features.Combat
 
         public override void OnUpdate()
         {
+            base.OnUpdate(); // Due to keybinds
+
             if (!m_bIsConnected)
                 return;
-
-            base.OnUpdate(); // Due to keybinds
 
             float closest = 1000f;
             current = GetCamera();

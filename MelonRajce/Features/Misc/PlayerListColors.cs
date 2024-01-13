@@ -7,7 +7,7 @@ namespace MelonRajce.Features.Misc
 {
     internal class PlayerListColors : Feature
     {
-        [HarmonyPatch(typeof(PlayerList))]
+        /*[HarmonyPatch(typeof(PlayerList))]
         [HarmonyPatch("UpdateColors")]
         [HarmonyPatch(MethodType.Normal)]
         private static class PlayerListPatch
@@ -15,7 +15,7 @@ namespace MelonRajce.Features.Misc
             private static PlayerListColors plrlist = FeatureManager.GetFeature<PlayerListColors>();
 
             private static void Postfix() => plrlist.RunUpdate();
-        }
+        }*/
 
         public override string Name { get; protected set; } = "Better player list";
         public override string Description { get; protected set; } = "Makes the player list better";
